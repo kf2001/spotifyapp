@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <base href="/">
+    <link rel="stylesheet" href="onsenui/css/onsenui.min.css">
+    <link rel="stylesheet" href="onsenui/css/onsen-css-components.min.css">
+    <script src="onsenui/js/onsenui.min.js"></script>
+
+
+    <script src="spotapi.js"></script>
+
+
+<script>
+     if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw_sp.js')
+          .then(() => console.log("Service Worker Registered"))
+          .catch(e => console.log(e));
+      } 
+ </script>   
+
+<link rel="manifest" href="/manifest_sp.json">
+
+    <title>SpotifyApp</title>
+
+
+</head>
+
+
+<style>
+    caption {
+        text-align: left;
+        color: maroon;
+        font-weight: bolder;
+        font-size: larger;
+        background: white;
+        margin-bottom: 10px;
+        ;
+    }
+
+    th {
+        text-align: center;
+        color: lightgreen;
+        font-weight: bolder;
+        background: #222
+    }
+
+
+    tr:nth-child(2n+1) {
+        background: beige
+    }
+
+    tr:nth-child(2n) {
+        background: azure
+    }
+
+
+    .tfeatures tr:nth-child(2n+1) {
+        background: white;
+        color: black;
+    }
+
+    .tfeatures tr:nth-child(2n) {
+        background: white;
+        color: black;
+    }
+
+
+    .search-container999 {
+        display: flex;
+        flex-flow: row wrap;
+        justify-content: left;
+    }
+
+    .search-container999 div {
+        margin: 20px;
+        width: 20%;
+    }
+
+    .flex-container {
+        display: flex;
+        flex-flow: row nowrap;
+        justify-content: left;
+    }
+
+    .flex-container div {
+        margin: 30px;
+        width: 45%;
+    }
+
+
+    .onsbutton {
+        border: 0px solid black;
+        background-color: transparent;
+        color: black;
+        padding: 4px 10px;
+        font-size: 12px;
+        cursor: pointer;
+
+    }
+
+    input[type=button]
+   {
+        border: 0px solid black;
+        background-color: transparent;
+        color: black;
+        padding: 4px 10px;
+        font-size: 12px;
+        cursor: pointer;
+        text-decoration: underline;
+    }
+
+    /* Green */
+    .success {
+        border-color: #4CAF50;
+        color: green;
+    }
+
+    ons-modal {
+
+        width: 30%;
+        height: 40%;
+        margin: auto;
+        border-radius: 8px;
+        background: #FEFEFE;
+        box-shadow: 1px 1px 10px #333333;
+
+
+    }
+</style>
+
+<body>
+    <ons-page>
+        <ons-toolbar>
+            <div class="center">Spotify App</div>
+         
+        </ons-toolbar>
+
+
+        <div id="searchdiv">
+   <div  class="left">
+            <ons-search-input id="search_query" value="Beethoven"></ons-search-input>
+            <ons-button modifier="small"  onclick="cerca()">OK</ons-button></div>
+        </div>
+
+        <div id="main">
+
+        
+
+
+     
+
+        <ons-carousel fullscreen swipeable auto-scroll overscrollable id="carousel">
+            <ons-carousel-item >
+                <div style="text-align: center;margin: 30px;" id="divartisti">
+
+                </div>
+            </ons-carousel-item>
+            <ons-carousel-item >
+                <div style="text-align: center;margin: 30px;" id="divalbum">
+
+                </div>
+            </ons-carousel-item>
+            <ons-carousel-item >
+                <div style="text-align: center;margin: 30px;" id="divtracce">
+
+                </div>
+            </ons-carousel-item>
+        </ons-carousel>
+
+
+
+
+
+        </div>
+   <ons-bottom-toolbar>
+            <ons-segment id="segmentCarusel" style="width: 80%;margin-left:50px;">
+                <button onclick="changeCarusel()">Artisti</button>
+                <button onclick="changeCarusel()">Album</button>
+                <button onclick="changeCarusel()">Tracce</button>
+            </ons-segment>
+
+
+        </ons-bottom-toolbar>
+    </ons-page>
+
+    <ons-modal direction="up">
+        <div style="text-align: center" id="audioFeatures" style="width:40%; margin:auto auto;">
+
+        </div>
+
+        <ons-button modifier="small" onclick="hideModalTraccia()">OK</ons-button>
+    </ons-modal>
+
+    <script>
+
+
+        function changeCarusel() {
+
+            var scelta = document.getElementById('segmentCarusel').getActiveButtonIndex()
+
+            var carousel = document.getElementById('carousel');
+            carousel.setActiveIndex(scelta)
+
+
+
+        }
+
+   
+
+
+        var nomialbum = []
+
+        initSpotify('a4b4a9f0479e4d9c9c024dfb24a6844a', 'cb87543a8e2a4482af79ae3f2acef09a')
+
+
+        function showModalTraccia(dati) {
+            var modal = document.querySelector('ons-modal');
+
+            document.getElementById("audioFeatures").innerHTML = mostrafeatures(dati)
+
+            modal.show();
+
+
+
+        }
+
+
+        function cerca() {
+
+
+            var scelta = document.getElementById('segmentCarusel').getActiveButtonIndex()
+            var query = document.getElementById("search_query").value;
+
+            switch (scelta) {
+
+
+                case 0: cercaArtisti(query); break;
+                case 1: cercaAlbums(query); break;
+                case 2: cercaTracce(query); break;
+
+
+
+            }
+            var carousel = document.getElementById('carousel');
+            carousel.setActiveIndex(scelta)
+
+        }
+
+        function hideModalTraccia() {
+            var modal = document.querySelector('ons-modal');
+
+
+            modal.hide();
+
+        }
+
+        var nomialbum = []
+
+
+        var modo = 0
+        var audio;
+        function mostraalbums(dati) {
+
+
+            var strh = "<table>"
+
+            strh += "<caption>Elenco Album</caption>"
+            strh += "<tr>"
+            strh += "<th style='width: 40%;'>Titolo</th>"
+            strh += "<th style='width: 5%;'>Anno</th>"
+            strh += "<th style='width: 25%;'></th>"
+            strh += "<th style='width: 10%;'>Tracce</th>"
+            strh += "<th style='width: 20%;'>Artista</th>"
+
+            strh += "</tr>"
+
+            var vaitracce = '<ons-button onclick="vaiTracce(XXX,YYY)">'+'<ons-icon icon="fa-list-ol" size="20px" style="color: white"></ons-icon></ons-button>'
+            var vaiartista = '<input type="button" onclick="vaiArtista(XXX)" value="YYY"/>'
+
+            dati.forEach(function (element, idx) {
+
+                nomialbum[idx] = element.name
+
+                strh += "<tr>"
+
+                strh += "<td>" + element.name + "</td>"
+                strh += "<td>" + new Date(element.release_date).getFullYear() + "</td>"
+                strh += "<td><a href='" + element.images[0].url + "' target=_blank >" + "<img src='" + element.images[0].url + "' width='60px'></a></td>"
+
+                //   strh += "<td>" + element.artists[0].name + "</td>"
+
+                strh += "<td>" + vaitracce.replace('XXX', "'" + element.id + "'").replace('YYY', "'" + idx + "'") + "</td>"
+                //   strh += "<td>" + vaitracce.replace('XXX', "'" + element.id + "'").replace('YYY', "'" + element.name + "'") + "</td>"
+                strh += "<td>" + vaiartista.replace('XXX', "'" + element.artists[0].id + "'").replace('YYY', element.artists[0].name) + "</td>"
+                // strh += "<td><button onclick='vai_artista(''"+element.artists[0].id+"')'>"+"Vai Artista</button></td>"
+
+
+                strh += "</tr>"
+
+            });
+
+            strh += "</table>"
+
+
+            document.getElementById("divalbum").innerHTML = strh
+            modo = 2
+
+            aggiorna_visibilita(modo)
+
+
+        }
+
+
+        function mostratracce(dati, album, nomealbum) {
+
+
+            var iconfeat="?"//   ""
+            var suonatraccia = '<ons-button onclick="suona(XXX)"><ons-icon icon="fa-music" size="20px" style="color: yellow"></ons-icon></ons-button>'
+
+            var vaiartista = '<input type="button" onclick="vaiArtista(XXX)" value=YYY />'
+            var vaitracce = '<input type="button" onclick="vaiTracce(XXX,DDD)" value=YYY />'
+            var vaifeatures = '<ons-button" onclick="audioFeatures(XXX)"  ><ons-icon icon="fa-info"  size="20px" style="color: red;"></ons-icon></ons-button>'
+
+            //       var vaifeatures = '<input type="button" onclick="showModal(XXX)" value=YYY />'
+
+            var strh = "<table>"
+
+            if (album == 0) strh += "<caption>Top tracce</caption>"; else strh += "<caption>" + nomealbum + "</caption > "
+
+            strh += "<tr>"
+            strh += "<th style='width:40%'>Titolo</th>"
+            strh += "<th style='width:6%'>Durata</th>"
+            strh += "<th style='width:6%'>Mp3</th>"
+            strh += "<th style='width:22%'>Artista</th>"
+
+       
+                strh += "<th 'width:20%'>Album</th>"
+                strh += "<th 'width:6%'>Features</th>"
+
+            strh += "</tr>"
+            dati.forEach(function (element, idx) {
+                if (element.album) nomialbum[idx] = element.album.name
+                strh += "<tr>"
+
+                strh += "<td>" + element.name + "</td>"
+                strh += "<td>" + format_duration(Math.floor(element.duration_ms / 1000)) + "</td>"
+                //     strh += "<td><a href='" + element.preview_url + "' target=_blank>Suona</a></td>"
+
+                if (element.preview_url) strh += "<td>" + suonatraccia.replace('XXX', "'" + element.preview_url + "'") + "</td>"
+
+                else
+                    strh += "<td style='text-align:center'>---</td>"
+
+                strh += "<td>" + vaiartista.replace('XXX', "'" + element.artists[0].id + "'").replace('YYY', "'" + element.artists[0].name + "'") + "</td>"
+                if (element.album) strh += "<td>" + vaitracce.replace('XXX', "'" + element.album.id + "'").replace('DDD', "'" + idx + "'").replace('YYY', "'" + element.album.name + "'") + "</td>"
+                else
+                    strh += "<td></td>"
+
+                //     strh += "<td>" + element.album.name+ "</td>"
+
+                strh += "<td>" + vaifeatures.replace('XXX', "'" + element.id + "'").replace('YYY', iconfeat) + "</td>"
+
+           
+
+                strh += "</tr>"
+
+            });
+
+            strh += "</table>"
+
+            document.getElementById("divtracce").innerHTML = strh
+
+            if (album == 1) modo = 2; else modo = 1
+
+
+
+        }
+
+
+        function mostraartisti(dati) {
+
+
+            var vaitracce = '<input type="button" onclick="TopTracce(XXX)" value="Top Tracce"/>'
+            var vaialbums = '<input type="button" onclick="vaiArtista(XXX)" value="Albums" />'
+
+            var strh = "<table>"
+
+            strh += "<caption>Elenco Artisti</caption>"
+
+            dati.forEach(element => {
+
+                strh += "<tr>"
+
+                strh += "<td>" + element.name + "</td>"
+
+                if (element.images.length > 0) strh += "<td><a href='" + element.images[0].url + "' target=_blank >" + "<img src='" + element.images[0].url + "' width='60px'></a></td>"
+                else strh += "<td></td>"
+
+
+                strh += "<td>" + vaialbums.replace('XXX', "'" + element.id + "'") + "</td>"
+                strh += "<td>" + vaitracce.replace('XXX', "'" + element.id + "'") + "</td>"
+
+                strh += "</tr>"
+
+            });
+
+            strh += "</table>"
+
+            document.getElementById("divartisti").innerHTML = strh
+
+
+            modo = 1
+
+            aggiorna_visibilita(modo)
+
+        }
+
+
+        function mostrafeatures(dati) {
+
+
+            data = dati
+
+            var strh = "<table class=tfeatures>"
+
+            strh += "<caption>Audio Features</caption>"
+
+
+            var strmodo = ["minore", "maggiore"]
+            var strkey = ["Do", "Do#", "Re", "Mib", "Mi", "Fa", "Fa#", "Sol", "Lab", "La", "Sib", "Si"]
+
+            strh += ""
+
+            strh += "<tr><td>Chiave</td><td>" + strkey[data.key] + " " + strmodo[data.mode] + "</td></tr>"
+            strh += "<tr><td>Ritmo</td><td>" + data.time_signature + "</td></tr>"
+            strh += "<tr><td>Danzabiltà</td><td>" + data.danceability + "</td></tr>"
+            strh += "<tr><td>Energia</td><td>" + data.energy + "</td></tr>"
+
+            strh += "<tr><td>Dal vivo</td><td>" + data.liveness + "</td></tr>"
+
+            strh += "<tr><td>Parlato</td><td>" + data.speechiness + "</td></tr>"
+
+            strh += "<tr><td>Valence</td><td>" + data.valence + "</td></tr>"
+            strh += "<tr><td>Acustico</td><td>" + data.acousticness + "</td></tr>"
+
+
+
+
+
+
+            strh += "</table>"
+
+            return strh
+
+
+
+
+
+        }
+
+        function cercaArtisti(query) {
+
+
+            cerca_artisti(query, eccoArtisti)
+
+        }
+
+
+        function eccoArtisti(dd) {
+
+            mostraartisti(dd.artists.items)
+            var carousel = document.getElementById('carousel');
+            carousel.setActiveIndex(0)
+            document.getElementById('segmentCarusel').setActiveButton(0)
+
+        }
+
+        function cercaAlbums(query) {
+
+
+            cerca_albums(query, eccoAlbums)
+
+        }
+
+        function eccoAlbums(dd) {
+
+            mostraalbums(dd.albums.items)
+            var carousel = document.getElementById('carousel');
+            carousel.setActiveIndex(1)
+            document.getElementById('segmentCarusel').setActiveButton(1)
+
+        }
+
+        function cercaTracce(query) {
+
+            cerca_tracce(query, 0, eccoTracce)
+
+        }
+
+
+        function eccoTracce(dd, nomeAlbum) {
+
+            setTimeout(function () {
+                if (nomeAlbum)
+                    mostratracce(dd.tracks.items, 1, nomialbum[nomeAlbum])
+                else
+                    mostratracce(dd.tracks.items, 0)
+            }, 50)
+
+
+            var carousel = document.getElementById('carousel');
+            carousel.setActiveIndex(2)
+            document.getElementById('segmentCarusel').setActiveButton(2)
+        }
+
+
+        function vaiTracce(idAlbum, nomeAlbum) {
+
+    
+            vai_album(idAlbum, nomeAlbum, eccoTracce)
+         
+
+        }
+
+
+
+        function TopTracce(idartista) {
+
+
+
+            top_tracce(idartista, eccoTopTracce)
+
+        }
+
+
+        function eccoTopTracce(dd) {
+
+        
+            mostratracce(dd.tracks, 0)
+            var carousel = document.getElementById('carousel');
+            carousel.setActiveIndex(2)
+            document.getElementById('segmentCarusel').setActiveButton(2)
+
+        }
+
+
+        function vaiArtista(idartista) {
+
+            vai_artista(idartista, eccoArtista)
+
+        }
+
+
+        function eccoArtista(dd) {
+
+         
+            mostraalbums(dd.items)
+            var carousel = document.getElementById('carousel');
+            carousel.setActiveIndex(1)
+            document.getElementById('segmentCarusel').setActiveButton(1)
+
+        }
+
+
+
+        function audioFeatures(idtraccia) {
+
+
+
+            audio_features(idtraccia, eccoFeatures)
+
+        }
+
+
+        function eccoFeatures(dd) {
+
+            console.log(dd)
+            showModalTraccia(dd)
+
+        }
+
+
+
+
+
+
+        function suona(mp3) {
+
+            if (audio) {
+                audio.pause();
+                audio.currentTime = 0;
+            }
+
+            audio = new Audio(mp3);
+            audio.play()
+
+        }
+
+
+
+        function format_duration(time_) {
+            var strsec = ""
+
+            var minutes_ = Math.floor(time_ / 60)
+            var seconds_ = time_ % 60
+            if (seconds_ < 10) strsec = "0" + seconds_; else strsec = seconds_
+
+            return (minutes_ + "'" + strsec)
+
+
+        }
+
+        function aggiorna_visibilita(modo_) {
+
+            return
+            document.getElementById("divartisti").style.display = "none"
+            document.getElementById("divalbum").style.display = "none"
+            document.getElementById("divtracce").style.display = "block"
+
+            if (modo == 1)
+                document.getElementById("divartisti").style.display = "block"
+
+            if (modo == 2)
+                document.getElementById("divalbum").style.display = "block"
+
+        }
+    </script>
+
+</body>
+
+</html>
